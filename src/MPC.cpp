@@ -65,7 +65,7 @@ class FG_eval {
     }
     // Minimize the use of actuators.
     for (size_t t = 0; t < N - 1; ++t) {
-      fg[0] += 100 * pow(vars[delta_start + t], 2);
+      fg[0] += 10 * pow(vars[delta_start + t], 2);
       fg[0] += 10 * pow(vars[a_start + t], 2);
       // Panalize speed + steer
       fg[0] += 1000 * pow(vars[delta_start + t] * vars[v_start + t], 2);
