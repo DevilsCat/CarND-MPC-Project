@@ -10,8 +10,8 @@ using CppAD::AD;
 #define ACCELERATION_LIMIT 1.0 
 
 // Set the timestep length and duration
-size_t N = 25;
-double dt = 0.1;
+size_t N = 15;
+double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -102,18 +102,9 @@ class FG_eval {
       AD<double> v0 = vars[v_start + t - 1];
       AD<double> cte0 = vars[cte_start + t - 1];
       AD<double> epsi0 = vars[epsi_start + t - 1];
-      // Get actuation.
-      // Note that the code is tuned to handle the system control delay.
-      AD<double> delta0, a0;
-      if (t == 1) {
-        delta0 = vars[delta_start + t - 1];
-        a0 = vars[a_start + t - 1];
-      } else {
-        // Shift the previous acutation by 1 to mimic system delay. Note that
-        // this works since the dt is 0.1s. 
-        delta0 = vars[delta_start + t - 2];
-        a0 = vars[a_start + t - 2];
-      }
+      // Get actuation at time t.
+      AD<double> delta0 = vars[delta_start + t - 1];
+      AD<double> a0 = vars[a_start + t - 1];
 
       AD<double> f0 = utils::polyeval(coeffs, x0);
       AD<double> psides0 = atan(utils::polydereval(coeffs, x0));
@@ -124,7 +115,7 @@ class FG_eval {
       fg[1 + psi_start + t] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
       fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
       fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * sin(epsi0) * dt));
-      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
+      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
     }
   }
 };

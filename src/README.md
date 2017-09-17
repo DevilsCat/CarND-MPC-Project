@@ -34,9 +34,9 @@ The costs on vehicle actuators include:
 The constraints and update functions applies to each state predication and it follows the vehicle motion model.
 
 ### 2. Timestep Length and Elapsed Duration
-Firstly, I set the timestep is set to `25` and the elapsed duration to `0.05` timesteps. These are default value used in excercise, I didn't experiment with other values. The default value already satisfies calculation performance and vehicle control granularity.
+Firstly, I set the timestep is set to `25` and the elapsed duration to `0.05` timesteps. The default value already satisfies vehicle control granularity.
 
-When trying to handle 100ms latency issue, in order to make calculation easier, I set the duration  to `0.1` to represent 100ms.
+Then I noticed that the vehicle is now prediting states for `25 * 0.05 = 1.25s` future which is unnecessary and wasting computation resources, thus I reduce it to `15` timesteps for better performance.
 
 ### 3. Polynomial Fitting and MPC Preprocessing
 The project transform MPC calculation from map coordinate to vehicle's coordinate for two reasons:
@@ -45,7 +45,4 @@ The project transform MPC calculation from map coordinate to vehicle's coordinat
 2. The predicted waypoints is also in vehicle's coordinate so we can send the data directly to simuator without doing extra transformation. 
 
 ### 4. Model Predictive Control with Latency
-This is achieves by --
-
-1. Set timestep elapse duration to 0.1s (since the latency we expect is 100ms).
-2. When predicting state e.g. **t**, the actuation at **t-2** is used (instead of **t-1**) as the actuation takes 1 **t** (100ms) to propagate to the system for affecting state at **t** time.
+This is achieves by predicting `State` 100ms ahead before sending to the MPC for optimization. The details can be found in `main.cpp`(@line 90 - 99) .

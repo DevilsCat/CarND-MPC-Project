@@ -59,7 +59,8 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
-
+          double previous_a = j[1]["throttle"];
+          double previous_delta = j[1]["steering_angle"];
           /*
           * TODO: Calculate steering angle and throttle using MPC.
           *
@@ -85,7 +86,17 @@ int main() {
           double cte = utils::polyeval(coeffs, 0);
           double epsi = -atan(coeffs[1]);
           Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
+          
+          // Predict state 100ms further to handle actuator latency.
+          const double dt = 0.1;
+          const double Lf = 2.67;
+          state << 
+              (v * dt) , 
+              0, 
+              (0 - v * previous_delta / Lf * dt), 
+              (v + previous_a * dt), 
+              (cte + v * sin(epsi) * dt), 
+              (epsi - v * previous_delta / Lf * dt);
 
           double steer_value;
           double throttle_value;
